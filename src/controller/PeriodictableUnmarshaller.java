@@ -1,12 +1,12 @@
 package controller;
 
 import java.io.ByteArrayInputStream;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.ws.WebServiceException;
 
 import net.webservicex.Periodictable;
 import net.webservicex.PeriodictableSoap;
@@ -58,8 +58,9 @@ public class PeriodictableUnmarshaller {
 			String allElement = service.getAtoms();
 			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(allElement.getBytes()));
 			return element.getTableList();
-		} catch (JAXBException e) {
+		} catch (JAXBException | WebServiceException e) {
 			e.printStackTrace();
+			System.out.println("There is error occured with internet or unmarshall");
 		}
 		return null;
 	}
@@ -76,8 +77,9 @@ public class PeriodictableUnmarshaller {
 			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(information.getBytes()));
 			if(element.getTableList().size()>0)
 				return element.getTableList().get(0);
-		} catch (JAXBException e) {
+		} catch (JAXBException | WebServiceException e) {
 			e.printStackTrace();
+			System.out.println("There is error occured with internet or unmarshall");
 		}
 		return null;
 	}
