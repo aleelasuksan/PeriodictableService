@@ -7,14 +7,8 @@ import view.PeriodictableUI;
  * @author Atit Leelasuksan 5510546221
  *
  */
-public class MainUI implements Runnable {
+public class MainUI {
 
-	PeriodictableUI ui;
-	
-	public MainUI() {
-		PeriodictableUnmarshaller controller = new PeriodictableUnmarshaller();
-		ui = new PeriodictableUI(controller);
-	}
 	
 	/**
 	 * main method to run via IDE
@@ -23,11 +17,6 @@ public class MainUI implements Runnable {
 	public static void main(String[] args) {
 		PeriodictableUnmarshaller controller = new PeriodictableUnmarshaller();
 		PeriodictableUI ui = new PeriodictableUI(controller);
-		ui.run();
-	}
-
-	@Override
-	public void run() {
 		ui.run();
 	}
 
