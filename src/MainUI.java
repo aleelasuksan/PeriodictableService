@@ -1,7 +1,12 @@
 import controller.PeriodictableUnmarshaller;
 import view.PeriodictableUI;
 
-
+/**
+ * Client user interface main class.
+ * create controller then inject to user interface.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 public class MainUI {
 
 	/**

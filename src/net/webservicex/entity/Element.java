@@ -4,9 +4,19 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+/**
+ * Element entity with constant of unit.
+ * have name, symbol, atomic number, atomic weight, atomic radius, density, boiling point,
+ * melting point, ionisation potential, electronegativity.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 @XmlAccessorType (XmlAccessType.FIELD)
 public class Element {
 
+	/**
+	 * list of unit constant.
+	 */
 	public static String WEIGHT_UNIT = "Atomic Mass Unit";
 	public static String TEMPERATURE_UNIT = "ÅãK";
 	public static String IONISATION_POTENTIAL_UNIT = "kJ/mol";

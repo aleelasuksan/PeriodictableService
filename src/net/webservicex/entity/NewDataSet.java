@@ -7,6 +7,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * xml root entity class.
+ * have list of element.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 @XmlRootElement (name = "NewDataSet")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class NewDataSet {

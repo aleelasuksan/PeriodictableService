@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -24,8 +26,16 @@ import controller.PeriodictableUnmarshaller;
 
 import net.webservicex.entity.*;
 
+/**
+ * client user interface class.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 public class PeriodictableUI {
 
+	/**
+	 * all componenet that use in user interface.
+	 */
 	private JFrame frame = new JFrame("Periodictable Service");
 	
 	private JList<String> elementList;
@@ -74,9 +84,9 @@ public class PeriodictableUI {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				if(lastestTask!=null && !lastestTask.isDone()) lastestTask.cancel(true);
 				lastestTask = new LoadElementInfoTask((((JList<String>)e.getSource()).getSelectedValue()));
 				lastestTask.execute();
+				//lastestTask.get(120, TimeUnit.SECONDS);
 			}
 		});
 		listScroller = new JScrollPane(elementList);
@@ -175,14 +185,17 @@ public class PeriodictableUI {
 		(new LoadAllElementTask()).execute();
 	}
 	
+	/**
+	 * load all element to list.
+	 */
 	private void loadAllElementtoList() {
 		elementList.setModel(getElementArray());
 		listScroller.updateUI();
 	}
 	
 	/**
-	 * Convert items's data to list model so it can use with JList
-	 * @return ListModel<String> of each item's title.
+	 * Convert element's data to list model so it can use with JList
+	 * @return ListModel<String> of each element's name.
 	 */
 	public ListModel<String> getElementArray() {
 		DefaultListModel<String> list = new DefaultListModel<String>();
@@ -192,6 +205,10 @@ public class PeriodictableUI {
 		return list;
 	}
 	
+	/**
+	 * update element information label from input.
+	 * @param elementInfo to update.
+	 */
 	public void updateElementInfo(Element elementInfo) {
 		eleName.setText(elementInfo.getElementName());
 		eleSymbol.setText(elementInfo.getSymbol());
@@ -205,6 +222,11 @@ public class PeriodictableUI {
 		eleEleNeg.setText(elementInfo.getEletroNegativity()+" "+Element.ELECTRO_NEGATIVITY_UNIT);
 	}
 	
+	/**
+	 * task to handle load all element in background.
+	 * @author Atit Leelasuksan 5510546221
+	 *
+	 */
 	class LoadAllElementTask extends SwingWorker<List<Element>, Object> {
 
 		@Override
@@ -220,6 +242,11 @@ public class PeriodictableUI {
 		
 	}
 	
+	/**
+	 * task to handle load element info in background.
+	 * @author Atit Leelasuksan 5510546221
+	 *
+	 */
 	class LoadElementInfoTask extends SwingWorker<Element, Object> {
 
 		private String elementName;

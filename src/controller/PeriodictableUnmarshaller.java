@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.ByteArrayInputStream;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -12,14 +13,30 @@ import net.webservicex.PeriodictableSoap;
 import net.webservicex.entity.Element;
 import net.webservicex.entity.NewDataSet;
 
+/**
+ * Controller class for handle service request from user interface.
+ * have 2 function of request,
+ * first is request all element that service provided.
+ * second is request specific information of element by element name.
+ * Second function support only element name, can't use symbol.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 public class PeriodictableUnmarshaller {
 
+	/**
+	 * service to use.
+	 */
 	private PeriodictableSoap service;
 	
+	/**
+	 * unmarshaller to unmarshall xml to java object.
+	 */
 	private Unmarshaller unm;
 	
-	private String s;
-	
+	/**
+	 * default constructor.
+	 */
 	public PeriodictableUnmarshaller() {
 		Periodictable factory = new Periodictable();
 		service = factory.getPeriodictableSoap();
@@ -31,9 +48,14 @@ public class PeriodictableUnmarshaller {
 		}
 	}
 	
+	/**
+	 * first function of this service.
+	 * get all element that have information in service.
+	 * @return list of all element.
+	 */
 	public List<Element> getAllElement() {
-		String allElement = service.getAtoms();
 		try {
+			String allElement = service.getAtoms();
 			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(allElement.getBytes()));
 			return element.getTableList();
 		} catch (JAXBException e) {
@@ -42,9 +64,15 @@ public class PeriodictableUnmarshaller {
 		return null;
 	}
 	
+	/**
+	 * second function of this service.
+	 * get element information from specific element name.
+	 * @param elementName to search.
+	 * @return element object which have element information.
+	 */
 	public Element getElementInfo(String elementName) {
-		String information = service.getAtomicNumber(elementName);
 		try {
+			String information = service.getAtomicNumber(elementName);
 			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(information.getBytes()));
 			if(element.getTableList().size()>0)
 				return element.getTableList().get(0);

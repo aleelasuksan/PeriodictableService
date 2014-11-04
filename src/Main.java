@@ -1,3 +1,4 @@
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,20 +14,22 @@ import net.webservicex.PeriodictableSoap;
 import net.webservicex.entity.Element;
 import net.webservicex.entity.NewDataSet;
 
+/**
+ * Client main class for console usage.
+ * @author Atit Leelasuksan 5510546221
+ *
+ */
 // http://www.webservicex.net/periodictable.asmx
 public class Main {
 
 	public static void main(String[] args) {
 		Periodictable factory = new Periodictable();
 		PeriodictableSoap proxy = factory.getPeriodictableSoap();
-		String data = proxy.getAtomicNumber("Actinium");
+		String data = proxy.getAtomicNumber("actinium");
 		try {
 			JAXBContext context = JAXBContext.newInstance( NewDataSet.class, Element.class);
 			Unmarshaller unm = context.createUnmarshaller();
-			File file = new File("/element.xml");
-			FileOutputStream output = new FileOutputStream(file);
-			output.write(data.getBytes());
-			NewDataSet element = (NewDataSet) unm.unmarshal(file);
+			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(data.getBytes()));
 			List<Element> table = element.getTableList();
 			Element ele = table.get(0);
 			System.out.println(ele.getAtomicNumber());
@@ -39,7 +42,7 @@ public class Main {
 			System.out.println(ele.getEletroNegativity());
 			System.out.println(ele.getIonisationPotential());
 			System.out.println(ele.getSymbol());
-		} catch (JAXBException | IOException | WebServiceException je) {
+		} catch (JAXBException | WebServiceException je) {
 			//je.printStackTrace();
 		}
 	}
