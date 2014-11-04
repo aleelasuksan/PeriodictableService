@@ -38,12 +38,12 @@ public class PeriodictableUnmarshaller {
 	 * default constructor.
 	 */
 	public PeriodictableUnmarshaller() {
-		Periodictable factory = new Periodictable();
-		service = factory.getPeriodictableSoap();
 		try {
+			Periodictable factory = new Periodictable();
+			service = factory.getPeriodictableSoap();
 			JAXBContext context = JAXBContext.newInstance( NewDataSet.class, Element.class);
 			unm = context.createUnmarshaller();
-		} catch (JAXBException je) {
+		} catch (JAXBException | WebServiceException je) {
 			je.printStackTrace();
 		}
 	}

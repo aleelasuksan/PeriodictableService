@@ -3,6 +3,8 @@ package view;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -11,9 +13,11 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
@@ -21,6 +25,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.xml.ws.WebServiceException;
 
 import controller.PeriodictableUnmarshaller;
 
@@ -74,7 +79,7 @@ public class PeriodictableUI {
 	}
 	
 	private void initComponent() {
-		frame.setSize(500,320);
+		frame.setSize(500,350);
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 		
@@ -167,15 +172,26 @@ public class PeriodictableUI {
 		
 		contentContainer = new Container();
 		contentContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
-		listScroller.getInsets().set(100, 100, 100, 100);
-		resultContainer.getInsets().set(5, 5, 5, 5);
 		contentContainer.add(listScroller);
 		contentContainer.add(resultContainer);
+		
+		Container outer = new Container();
+		outer.setLayout(new BoxLayout(outer, BoxLayout.Y_AXIS));
+		outer.add(contentContainer);
+		JButton reset = new JButton("Reset Service");
+		reset.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				resetService();
+			}
+		});
+		outer.add(reset);
 		
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
 		pane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		pane.add(contentContainer);
+		pane.add(outer);
 		frame.add(pane);
 		frame.setResizable(false);
 	}
@@ -199,10 +215,17 @@ public class PeriodictableUI {
 	 */
 	public ListModel<String> getElementArray() {
 		DefaultListModel<String> list = new DefaultListModel<String>();
-		for(Element ele : controller.getAllElement()) {
-			list.addElement(ele.getElementName());
+		try{
+			List<Element> allElement = controller.getAllElement();
+			for(Element ele : allElement) {
+				list.addElement(ele.getElementName());
+			}
+			return list;
+		} catch( WebServiceException e) {
+			JOptionPane alert = new JOptionPane("Error occured! Please press reset button"
+					, JOptionPane.ERROR_MESSAGE);
 		}
-		return list;
+		return null;
 	}
 	
 	/**
@@ -220,6 +243,11 @@ public class PeriodictableUI {
 		eleDensity.setText(elementInfo.getDensity()+" "+Element.DENSITY_UNIT);
 		eleIoPot.setText(elementInfo.getIonisationPotential()+" "+Element.IONISATION_POTENTIAL_UNIT);
 		eleEleNeg.setText(elementInfo.getEletroNegativity()+" "+Element.ELECTRO_NEGATIVITY_UNIT);
+	}
+	
+	private void resetService() {
+		controller = new PeriodictableUnmarshaller();
+		(new LoadAllElementTask()).execute();
 	}
 	
 	/**
