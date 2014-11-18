@@ -1,4 +1,4 @@
-package view;
+package ku.ske.periodictable.view;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,7 +27,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.ws.WebServiceException;
 
-import controller.PeriodictableUnmarshaller;
+import ku.ske.periodictable.controller.PeriodictableUnmarshaller;
+
 
 import net.webservicex.entity.*;
 
@@ -73,6 +74,8 @@ public class PeriodictableUI {
 	
 	private LoadElementInfoTask lastestTask;
 	
+	private String[] timeoutOption = {"OK"};
+	
 	public PeriodictableUI(PeriodictableUnmarshaller controller) {
 		initComponent();
 		this.controller = controller;
@@ -91,7 +94,13 @@ public class PeriodictableUI {
 			public void valueChanged(ListSelectionEvent e) {
 				lastestTask = new LoadElementInfoTask((((JList<String>)e.getSource()).getSelectedValue()));
 				lastestTask.execute();
-				//lastestTask.get(120, TimeUnit.SECONDS);
+				try {
+					lastestTask.get(10, TimeUnit.SECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException | WebServiceException e1) {
+					JOptionPane.showOptionDialog(frame, "Request Timeout!", "Timeout", 
+							JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+							timeoutOption, timeoutOption[0]);
+				}
 			}
 		});
 		listScroller = new JScrollPane(elementList);
@@ -222,8 +231,11 @@ public class PeriodictableUI {
 			}
 			return list;
 		} catch( WebServiceException e) {
-			JOptionPane alert = new JOptionPane("Error occured! Please press reset button"
-					, JOptionPane.ERROR_MESSAGE);
+			String[] options = {"Retry", "Cancel"};
+			int choose = JOptionPane.showOptionDialog(frame, "Network error occured!", "Network Error", 
+					JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+					options, options[0]);
+			if(choose==0) loadAllElementtoList();
 		}
 		return null;
 	}
@@ -293,7 +305,7 @@ public class PeriodictableUI {
 			try {
 				updateElementInfo(get());
 			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				
 			}
 		}
 	}

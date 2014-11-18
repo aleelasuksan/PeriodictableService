@@ -1,4 +1,4 @@
-package controller;
+package ku.ske.periodictable.controller;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -44,7 +44,7 @@ public class PeriodictableUnmarshaller {
 			JAXBContext context = JAXBContext.newInstance( NewDataSet.class, Element.class);
 			unm = context.createUnmarshaller();
 		} catch (JAXBException | WebServiceException je) {
-			je.printStackTrace();
+			throw new WebServiceException();
 		}
 	}
 	
@@ -59,10 +59,8 @@ public class PeriodictableUnmarshaller {
 			NewDataSet element = (NewDataSet) unm.unmarshal(new ByteArrayInputStream(allElement.getBytes()));
 			return element.getTableList();
 		} catch (JAXBException | WebServiceException e) {
-			e.printStackTrace();
-			System.out.println("There is error occured with internet or unmarshall");
+			throw new WebServiceException();
 		}
-		return null;
 	}
 	
 	/**
@@ -78,8 +76,7 @@ public class PeriodictableUnmarshaller {
 			if(element.getTableList().size()>0)
 				return element.getTableList().get(0);
 		} catch (JAXBException | WebServiceException e) {
-			e.printStackTrace();
-			System.out.println("There is error occured with internet or unmarshall");
+			throw new WebServiceException();
 		}
 		return null;
 	}

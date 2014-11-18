@@ -1,5 +1,8 @@
-import controller.PeriodictableUnmarshaller;
-import view.PeriodictableUI;
+import javax.swing.JOptionPane;
+import javax.xml.ws.WebServiceException;
+
+import ku.ske.periodictable.controller.PeriodictableUnmarshaller;
+import ku.ske.periodictable.view.PeriodictableUI;
 
 /**
  * Client user interface main class.
@@ -10,14 +13,34 @@ import view.PeriodictableUI;
 public class MainUI {
 
 	
+	private static PeriodictableUnmarshaller controller;
+	
+	private static String[] options = {"Retry", "Cancel"};
+	
 	/**
 	 * main method to run via IDE
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PeriodictableUnmarshaller controller = new PeriodictableUnmarshaller();
+		init();
+	}
+	
+	private static void init() {
+		try {
+			controller = new PeriodictableUnmarshaller();
+		} catch(WebServiceException e) {
+			int choose = JOptionPane.showOptionDialog(null, "No network connection!", "Network Error", 
+					JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+					options, options[0]);
+			if(choose==0) reInit();
+			return;
+		}
 		PeriodictableUI ui = new PeriodictableUI(controller);
 		ui.run();
+	}
+	
+	public static void reInit() {
+		init();
 	}
 
 }
