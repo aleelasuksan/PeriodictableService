@@ -1,13 +1,13 @@
 package ku.periodictable.view;
 
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.swing.BorderFactory;
@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.ws.WebServiceException;
@@ -79,6 +80,8 @@ public class PeriodictableUI {
 	
 	private PeriodictableCache cache;
 	
+	private int timeout = 10000;
+	
 	public PeriodictableUI(PeriodictableUnmarshaller controller) {
 		cache = new PeriodictableCache();
 		initComponent();
@@ -86,7 +89,7 @@ public class PeriodictableUI {
 	}
 	
 	private void initComponent() {
-		frame.setSize(500,350);
+		frame.setSize(600,350);
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 		
@@ -103,13 +106,7 @@ public class PeriodictableUI {
 				else {
 					lastestTask = new LoadElementInfoTask(eleName);
 					lastestTask.execute();
-					try {
-						lastestTask.get(10, TimeUnit.SECONDS);
-					} catch (InterruptedException | ExecutionException | TimeoutException | WebServiceException e1) {
-						JOptionPane.showOptionDialog(frame, "Request Timeout!", "Timeout", 
-								JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
-								timeoutOption, timeoutOption[0]);
-					}
+					changeToWaitCursor();
 				}
 			}
 		});
@@ -215,9 +212,27 @@ public class PeriodictableUI {
 		frame.setResizable(false);
 	}
 	
+	/**
+	 * change frame mouse to wait cursor.
+	 */
+	private void changeToWaitCursor() {
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	}
+	
+	/**
+	 * change frame mouse to default cursor.
+	 */
+	private void changeToDefaultCursor() {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	}
+	
+	/**
+	 * show frame and start load all element.
+	 */
 	public void run() {
 		frame.setVisible(true);
 		(new LoadAllElementTask()).execute();
+		changeToWaitCursor();
 	}
 	
 	/**
@@ -268,9 +283,22 @@ public class PeriodictableUI {
 		eleEleNeg.setText(elementInfo.getEletroNegativity()+" "+Element.ELECTRO_NEGATIVITY_UNIT);
 	}
 	
+	/**
+	 * reinitialize controller.
+	 */
 	private void resetService() {
 		controller = new PeriodictableUnmarshaller();
 		(new LoadAllElementTask()).execute();
+	}
+	
+	/**
+	 * show timeout dialog which have only ok button.
+	 */
+	public void showTimeoutDialog() {
+		JOptionPane.showOptionDialog(frame, "Request Timeout!", "Timeout", 
+				JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+				timeoutOption, timeoutOption[0]);
+		changeToDefaultCursor();
 	}
 	
 	/**
@@ -280,15 +308,45 @@ public class PeriodictableUI {
 	 */
 	class LoadAllElementTask extends SwingWorker<List<Element>, Object> {
 
+		private boolean isTimeout = false;
+		
+		private Timer time;
+		
+		LoadAllElementTask() {
+			timeoutCounter();
+		}
+		
 		@Override
 		protected List<Element> doInBackground() throws Exception {
 			loadAllElementtoList();
 			return null;
 		}
 		
+		/**
+		 * set timer to timeout at 15 second and start timer
+		 */
+		private void timeoutCounter() {
+			final LoadAllElementTask worker = this;
+			time = new Timer(timeout, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					worker.cancel(true);
+					isTimeout = true;
+				}
+			});
+			time.start();
+		}
+		
 		@Override
 		protected void done() {
-			listScroller.updateUI();
+			time.stop();
+			if(isTimeout) {
+				showTimeoutDialog();
+			}
+			else {
+				listScroller.updateUI();
+				changeToDefaultCursor();
+			}
 		}
 		
 	}
@@ -302,8 +360,13 @@ public class PeriodictableUI {
 
 		private String elementName;
 		
+		private boolean isTimeout = false;
+		
+		private Timer time;
+		
 		LoadElementInfoTask(String elementName) {
 			this.elementName = elementName;
+			timeoutCounter();
 		}
 		
 		@Override
@@ -311,13 +374,38 @@ public class PeriodictableUI {
 			return controller.getElementInfo(elementName);
 		}
 		
+		/**
+		 * set timer to timeout at 15 second and start timer
+		 */
+		private void timeoutCounter() {
+			final LoadElementInfoTask worker = this;
+			time = new Timer(timeout, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					worker.cancel(true);
+					isTimeout = true;
+				}
+			});
+			time.start();
+		}
+		
 		@Override
 		protected void done() {
-			try {
-				cache.addToCache(elementName, get());
-				updateElementInfo(get());
-			} catch (InterruptedException | ExecutionException e) {
-				
+			time.stop();
+			if(isTimeout) {
+				showTimeoutDialog();
+			}
+			else {
+				try {
+					cache.addToCache(elementName, get());
+					updateElementInfo(get());
+				} catch (InterruptedException | ExecutionException e) {
+					JOptionPane.showOptionDialog(frame, "Request Cancelled", "Request Cancelled", 
+							JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+							timeoutOption, timeoutOption[0]);
+				} finally {
+					changeToDefaultCursor();
+				}
 			}
 		}
 	}

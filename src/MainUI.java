@@ -25,6 +25,9 @@ public class MainUI {
 		init();
 	}
 	
+	/**
+	 * initialize all component for periodictable webservice client.
+	 */
 	private static void init() {
 		try {
 			controller = new PeriodictableUnmarshaller();
@@ -39,6 +42,11 @@ public class MainUI {
 		ui.run();
 	}
 	
+	/**
+	 * callback method to call init method, 
+	 * I try to use this to prevent directly call to init method.
+	 * It should use for callback but I still didn't use this.
+	 */
 	public static void reInit() {
 		init();
 	}
