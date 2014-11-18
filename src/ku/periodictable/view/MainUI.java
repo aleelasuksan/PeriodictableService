@@ -1,8 +1,11 @@
+package ku.periodictable.view;
+
+import java.awt.Frame;
+
 import javax.swing.JOptionPane;
 import javax.xml.ws.WebServiceException;
 
 import ku.periodictable.controller.PeriodictableUnmarshaller;
-import ku.periodictable.view.PeriodictableUI;
 
 /**
  * Client user interface main class.
@@ -15,6 +18,7 @@ public class MainUI {
 	
 	private static PeriodictableUnmarshaller controller;
 	
+	private static PeriodictableUI ui;
 	private static String[] options = {"Retry", "Cancel"};
 	
 	/**
@@ -22,33 +26,28 @@ public class MainUI {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		init();
-	}
-	
-	/**
-	 * initialize all component for periodictable webservice client.
-	 */
-	private static void init() {
-		try {
-			controller = new PeriodictableUnmarshaller();
-		} catch(WebServiceException e) {
-			int choose = JOptionPane.showOptionDialog(null, "No network connection!", "Network Error", 
-					JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, 
-					options, options[0]);
-			if(choose==0) reInit();
-			return;
-		}
-		PeriodictableUI ui = new PeriodictableUI(controller);
+		ui = new PeriodictableUI();
 		ui.run();
 	}
 	
 	/**
-	 * callback method to call init method, 
-	 * I try to use this to prevent directly call to init method.
-	 * It should use for callback but I still didn't use this.
+	 * callback method for ui to retrieve a controller.
 	 */
-	public static void reInit() {
-		init();
+	public static PeriodictableUnmarshaller createController(Frame frame) {
+		try {
+			controller = new PeriodictableUnmarshaller();
+			return controller;
+		} catch(WebServiceException e) {
+			int choose = JOptionPane.showOptionDialog(null, "No network connection!", "Network Error", 
+					JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+					options, options[0]);
+			if(choose==0) {
+				return createController(frame);
+			} else {
+				frame.dispose();
+				return null;
+			}
+		}
 	}
 
 }

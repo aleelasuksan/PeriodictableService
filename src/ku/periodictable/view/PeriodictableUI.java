@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -82,12 +81,18 @@ public class PeriodictableUI {
 	
 	private int timeout = 10000;
 	
-	public PeriodictableUI(PeriodictableUnmarshaller controller) {
+	/**
+	 * default contructor,
+	 * create cache and call initComponent.
+	 */
+	public PeriodictableUI() {
 		cache = new PeriodictableCache();
 		initComponent();
-		this.controller = controller;
 	}
 	
+	/**
+	 * initialize component of ui.
+	 */
 	private void initComponent() {
 		frame.setSize(600,350);
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -231,6 +236,16 @@ public class PeriodictableUI {
 	 */
 	public void run() {
 		frame.setVisible(true);
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		controller = MainUI.createController(frame);
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		preLoadElement();
+	}
+	
+	/**
+	 * load all element to list.
+	 */
+	public void preLoadElement() {
 		(new LoadAllElementTask()).execute();
 		changeToWaitCursor();
 	}
@@ -332,6 +347,7 @@ public class PeriodictableUI {
 				public void actionPerformed(ActionEvent e) {
 					worker.cancel(true);
 					isTimeout = true;
+					time.stop();
 				}
 			});
 			time.start();
@@ -339,7 +355,6 @@ public class PeriodictableUI {
 		
 		@Override
 		protected void done() {
-			time.stop();
 			if(isTimeout) {
 				showTimeoutDialog();
 			}
@@ -384,6 +399,7 @@ public class PeriodictableUI {
 				public void actionPerformed(ActionEvent e) {
 					worker.cancel(true);
 					isTimeout = true;
+					time.stop();
 				}
 			});
 			time.start();
@@ -391,7 +407,6 @@ public class PeriodictableUI {
 		
 		@Override
 		protected void done() {
-			time.stop();
 			if(isTimeout) {
 				showTimeoutDialog();
 			}
