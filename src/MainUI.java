@@ -1,8 +1,8 @@
 import javax.swing.JOptionPane;
 import javax.xml.ws.WebServiceException;
 
-import ku.ske.periodictable.controller.PeriodictableUnmarshaller;
-import ku.ske.periodictable.view.PeriodictableUI;
+import ku.periodictable.controller.PeriodictableUnmarshaller;
+import ku.periodictable.view.PeriodictableUI;
 
 /**
  * Client user interface main class.

@@ -1,4 +1,4 @@
-package ku.ske.periodictable.view;
+package ku.periodictable.view;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,7 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.ws.WebServiceException;
 
-import ku.ske.periodictable.controller.PeriodictableUnmarshaller;
+import ku.periodictable.controller.PeriodictableUnmarshaller;
 
 
 import net.webservicex.entity.*;

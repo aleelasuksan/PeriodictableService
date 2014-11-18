@@ -1,4 +1,4 @@
-package ku.ske.periodictable.controller;
+package ku.periodictable.controller;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
