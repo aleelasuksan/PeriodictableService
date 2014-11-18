@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.ws.WebServiceException;
 
+import ku.periodictable.controller.PeriodictableCache;
 import ku.periodictable.controller.PeriodictableUnmarshaller;
 
 
@@ -76,7 +77,10 @@ public class PeriodictableUI {
 	
 	private String[] timeoutOption = {"OK"};
 	
+	private PeriodictableCache cache;
+	
 	public PeriodictableUI(PeriodictableUnmarshaller controller) {
+		cache = new PeriodictableCache();
 		initComponent();
 		this.controller = controller;
 	}
@@ -92,14 +96,20 @@ public class PeriodictableUI {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				lastestTask = new LoadElementInfoTask((((JList<String>)e.getSource()).getSelectedValue()));
-				lastestTask.execute();
-				try {
-					lastestTask.get(10, TimeUnit.SECONDS);
-				} catch (InterruptedException | ExecutionException | TimeoutException | WebServiceException e1) {
-					JOptionPane.showOptionDialog(frame, "Request Timeout!", "Timeout", 
-							JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
-							timeoutOption, timeoutOption[0]);
+				String eleName = (((JList<String>)e.getSource()).getSelectedValue());
+				if(cache.containsKey(eleName)) {
+					updateElementInfo(cache.getInfo(eleName));
+				}
+				else {
+					lastestTask = new LoadElementInfoTask(eleName);
+					lastestTask.execute();
+					try {
+						lastestTask.get(10, TimeUnit.SECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException | WebServiceException e1) {
+						JOptionPane.showOptionDialog(frame, "Request Timeout!", "Timeout", 
+								JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, 
+								timeoutOption, timeoutOption[0]);
+					}
 				}
 			}
 		});
@@ -236,6 +246,7 @@ public class PeriodictableUI {
 					JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, 
 					options, options[0]);
 			if(choose==0) loadAllElementtoList();
+			else frame.dispose();
 		}
 		return null;
 	}
@@ -303,6 +314,7 @@ public class PeriodictableUI {
 		@Override
 		protected void done() {
 			try {
+				cache.addToCache(elementName, get());
 				updateElementInfo(get());
 			} catch (InterruptedException | ExecutionException e) {
 				
